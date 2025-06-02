@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Aplikasi Kalkulator Lengkap dengan Fitur Modern">
+  <title>Kalkulator App</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --primary: #4a6bff;
+      --secondary: #ff6b6b;
+      --dark: #2c3e50;
+      --light: #f8f9fa;
+      --success: #40c057;
+      --warning: #ff922b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      padding: 20px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      color: white;
+    }
+
+    .app-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .app-menu {
+      display: flex;
+      gap: 15px;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .kalkulator {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      width: 100%;
+      padding: 20px;
+    }
+
+    #layar {
+      width: 100%;
+      height: 100px;
+      font-size: 3em;
+      margin-bottom: 20px;
+      text-align: right;
+      padding: 15px;
+      border: none;
+      background: #f8f9fa;
+      border-radius: 10px;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+      color: #333;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tombol-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .tombol {
+      height: 70px;
+      font-size: 1.8em;
+      border: none;
+      border-radius: 12px;
+      background: #fff;
+      color: #333;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.1s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+    }
+
+    .tombol:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      background: #f0f0f0;
+    }
+
+    .tombol.operator {
+      background: var(--primary);
+      color: white;
+    }
+
+    .tombol.operator:active {
+      opacity: 0.9;
+    }
+
+    .tombol.equals {
+      background: var(--success);
+      color: white;
+    }
+
+    .tombol.equals:active {
+      opacity: 0.9;
+    }
+
+    .tombol.clear {
+      background: var(--secondary);
+      color: white;
+    }
+
+    .tombol.clear:active {
+      opacity: 0.9;
+    }
+
+    .tombol.backspace {
+      background: var(--warning);
+      color: white;
+    }
+
+    .tombol.backspace:active {
+      opacity: 0.9;
+    }
+
+    .tombol.zero {
+      grid-column: span 2;
+    }
+
+    .history-panel {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .history-title {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      color: #495057;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #e9ecef;
+      font-size: 0.9em;
+      color: #495057;
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .clear-history {
+      background: none;
+      border: none;
+      color: var(--secondary);
+      font-size: 0.8em;
+      cursor: pointer;
+    }
+
+    /* Theme switcher */
+    .theme-switcher {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      padding: 10px;
+      border-radius: 50%;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      z-index: 100;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .kalkulator {
+        padding: 15px;
+      }
+      
+      #layar {
+        height: 80px;
+        font-size: 2.5em;
+      }
+      
+      .tombol {
+        height: 60px;
+        font-size: 1.5em;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .tombol {
+        height: 55px;
+        font-size: 1.3em;
+      }
+    }
+
+    /* PWA install banner */
+    .install-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--dark);
+      color: white;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+    }
+
+    .install-banner.show {
+      transform: translateY(0);
+    }
+
+    .install-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .close-install {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="app-header">
+      <div class="app-title">Kalkulator App</div>
+      <div class="app-menu">
+        <button class="menu-btn" onclick="toggleHistory()">📋</button>
+        <button class="menu-btn" onclick="toggleTheme()">🌓</button>
+      </div>
+    </div>
+
+    <div class="kalkulator">
+      <input type="text" id="layar" disabled placeholder="0">
+      
+      <div class="tombol-container">
+        <button class="tombol clear" onclick="hapus()">C</button>
+        <button class="tombol backspace" onclick="hapusSatu()">⌫</button>
+        <button class="tombol operator" onclick="tambahAngka('/')">÷</button>
+        <button class="tombol operator" onclick="tambahAngka('*')">×</button>
+        
+        <button class="tombol" onclick="tambahAngka('7')">7</button>
+        <button class="tombol" onclick="tambahAngka('8')">8</button>
+        <button class="tombol" onclick="tambahAngka('9')">9</button>
+        <button class="tombol operator" onclick="tambahAngka('-')">−</button>
+        
+        <button class="tombol" onclick="tambahAngka('4')">4</button>
+        <button class="tombol" onclick="tambahAngka('5')">5</button>
+        <button class="tombol" onclick="tambahAngka('6')">6</button>
+        <button class="tombol operator" onclick="tambahAngka('+')">+</button>
+        
+        <button class="tombol" onclick="tambahAngka('1')">1</button>
+        <button class="tombol" onclick="tambahAngka('2')">2</button>
+        <button class="tombol" onclick="tambahAngka('3')">3</button>
+        <button class="tombol equals" onclick="hitung()">=</button>
+        
+        <button class="tombol zero" onclick="tambahAngka('0')">0</button>
+        <button class="tombol" onclick="tambahAngka('.')">.</button>
+      </div>
+      
+      <div class="history-panel" id="historyPanel">
+        <div class="history-title">
+          <span>Riwayat</span>
+          <button class="clear-history" onclick="clearHistory()">Hapus Semua</button>
+        </div>
+        <div id="history-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="theme-switcher" onclick="toggleTheme()">🌓</div>
+
+  <div class="install-banner" id="installBanner">
+    <span>Pasang aplikasi ini di perangkat Anda?</span>
+    <div>
+      <button class="install-btn" id="installBtn">Pasang</button>
+      <button class="close-install" onclick="hideInstallBanner()">✕</button>
+    </div>
+  </div>
+
+  <script>
+    // Calculator functionality
+    let history = [];
+    let isHistoryVisible = true;
+    
+    function tambahAngka(angka) {
+      const layar = document.getElementById("layar");
+      const currentValue = layar.value;
+      
+      // Add button press animation
+      const button = event.target;
+      button.classList.add("pressed");
+      setTimeout(() => button.classList.remove("pressed"), 100);
+      
+      // Prevent multiple decimal points in a number
+      if (angka === '.' && currentValue.includes('.') && !/[+\-*/]/.test(currentValue.slice(currentValue.lastIndexOf(' ') + 1))) {
+        return;
+      }
+      
+      // Handle operator input
+      if (['+', '-', '*', '/'].includes(angka)) {
+        // Prevent consecutive operators
+        const lastChar = currentValue.charAt(currentValue.length - 1);
+        if (['+', '-', '*', '/'].includes(lastChar)) {
+          layar.value = currentValue.slice(0, -1) + angka;
+          return;
+        }
+        layar.value += " " + angka + " ";
+        return;
+      }
+      
+      // Start new input after equals
+      if (currentValue === "0" || currentValue === "Error") {
+        layar.value = angka;
+      } else {
+        layar.value += angka;
+      }
+    }
+    
+    function hitung() {
+      const layar = document.getElementById("layar");
+      const expression = layar.value;
+      
+      try {
+        // Replace ÷ and × with / and * for evaluation
+        const sanitizedExpression = expression
+          .replace(/÷/g, '/')
+          .replace(/×/g, '*')
+          .replace(/−/g, '-');
+        
+        const result = eval(sanitizedExpression);
+        
+        // Format the result to avoid long decimals
+        const formattedResult = parseFloat(result.toFixed(10)).toString();
+        layar.value = formattedResult;
+        
+        // Add to history
+        history.unshift({
+          expression: expression,
+          result: formattedResult,
+          timestamp: new Date()
+        });
+        if (history.length > 10) history.pop();
+        updateHistory();
+        
+      } catch (e) {
+        layar.value = "Error";
+      }
+      
+      // Add animation to equals button
+      const equalsButton = document.querySelector('.equals');
+      equalsButton.classList.add("pressed");
+      setTimeout(() => equalsButton.classList.remove("pressed"), 200);
+    }
+    
+    function hapus() {
+      document.getElementById("layar").value = "";
+      
+      // Add animation to clear button
+      const clearButton = document.querySelector('.clear');
+      clearButton.classList.add("pressed");
+      setTimeout(() => clearButton.classList.remove("pressed"), 200);
+    }
+    
+    function hapusSatu() {
+      const layar = document.getElementById("layar");
+      const currentValue = layar.value;
+      
+      // Special handling for operators with spaces around them
+      if (currentValue.endsWith(" ")) {
+        layar.value = currentValue.slice(0, -3); // Remove operator with spaces
+      } else {
+        layar.value = currentValue.slice(0, -1); // Remove last character
+      }
+      
+      // If display becomes empty, show 0
+      if (layar.value === "") {
+        layar.value = "0";
+      }
+      
+      // Add animation to backspace button
+      const backspaceButton = document.querySelector('.backspace');
+      backspaceButton.classList.add("pressed");
+      setTimeout(() => backspaceButton.classList.remove("pressed"), 200);
+    }
+    
+    function updateHistory() {
+      const historyList = document.getElementById("history-list");
+      historyList.innerHTML = '';
+      
+      history.forEach((item, index) => {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        
+        // Make history items clickable to recall calculations
+        historyItem.innerHTML = `
+          <div onclick="recallCalculation(${index})" style="cursor: pointer;">
+            <div>${item.expression} =</div>
+            <div style="font-weight: bold; color: var(--primary);">${item.result}</div>
+            <div style="font-size: 0.7em; color: #999;">${formatTime(item.timestamp)}</div>
+          </div>
+        `;
+        historyList.appendChild(historyItem);
+      });
+    }
+    
+    function clearHistory() {
+      history = [];
+      updateHistory();
+    }
+    
+    function recallCalculation(index) {
+      document.getElementById("layar").value = history[index].expression;
+    }
+    
+    function formatTime(date) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    
+    function toggleHistory() {
+      const historyPanel = document.getElementById("historyPanel");
+      isHistoryVisible = !isHistoryVisible;
+      historyPanel.style.display = isHistoryVisible ? 'block' : 'none';
+    }
+    
+    // Theme management
+    function toggleTheme() {
+      const body = document.body;
+      if (body.classList.contains('dark-theme')) {
+        body.classList.remove('dark-theme');
+        localStorage.setItem('theme', 'light');
+      } else {
+        body.classList.add('dark-theme');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+    
+    // Check saved theme preference
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-theme');
+    }
+    
+    // Keyboard support
+    document.addEventListener('keydown', function(event) {
+      const key = event.key;
+      
+      // Handle number keys
+      if (/[0-9]/.test(key)) {
+        tambahAngka(key);
+        return;
+      }
+      
+      // Handle operators
+      if (['+', '-', '*', '/'].includes(key)) {
+        tambahAngka(key);
+        return;
+      }
+      
+      // Handle other keys
+      switch(key) {
+        case '.':
+          tambahAngka('.');
+          break;
+        case 'Enter':
+        case '=':
+          hitung();
+          break;
+        case 'Escape':
+          hapus();
+          break;
+        case 'Backspace':
+          hapusSatu();
+          break;
+      }
+    });
+    
+    // PWA Installation
+    let deferredPrompt;
+    const installBanner = document.getElementById('installBanner');
+    const installBtn = document.getElementById('installBtn');
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBanner.classList.add('show');
+    });
+    
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        deferredPrompt = null;
+        hideInstallBanner();
+      }
+    });
+    
+    function hideInstallBanner() {
+      installBanner.classList.remove('show');
+    }
+    
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(registration => {
+            console.log('ServiceWorker registration successful');
+          })
+          .catch(err => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
